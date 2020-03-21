@@ -31,7 +31,7 @@ namespace Application.User
                 return new User
                 {
                     DisplayName = user.DisplayName,
-                    UserName = user.UserName,
+                    Username = user.UserName,
                     Token = _jwtGenerator.CreateToken(user),
                     Image = null
                 };
