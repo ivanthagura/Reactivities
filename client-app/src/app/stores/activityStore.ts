@@ -1,4 +1,11 @@
-import { observable, action, computed, runInAction, reaction } from 'mobx';
+import {
+  observable,
+  action,
+  computed,
+  runInAction,
+  reaction,
+  toJS,
+} from 'mobx';
 import { SyntheticEvent } from 'react';
 import { IActivity } from '../models/activity';
 import agent from '../api/agent';
@@ -9,7 +16,7 @@ import { setActivityProps, createAttendee } from '../common/util/util';
 import {
   HubConnection,
   HubConnectionBuilder,
-  LogLevel
+  LogLevel,
 } from '@microsoft/signalr';
 
 const LIMIT = 2;
@@ -71,8 +78,8 @@ export default class ActivityStore {
 
   @action createHubConnection = (activityId: string) => {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5000/chat', {
-        accessTokenFactory: () => this.rootStore.commonStore.token!
+      .withUrl(process.env.REACT_APP_API_CHAT_URL!, {
+        accessTokenFactory: () => this.rootStore.commonStore.token!,
       })
       .configureLogging(LogLevel.Information)
       .build();
@@ -84,15 +91,15 @@ export default class ActivityStore {
         console.log('Attempting to join group');
         this.hubConnection!.invoke('AddToGroup', activityId);
       })
-      .catch(error => console.log('Error establishing connection: ', error));
+      .catch((error) => console.log('Error establishing connection: ', error));
 
-    this.hubConnection.on('ReceiveComment', comment => {
+    this.hubConnection.on('ReceiveComment', (comment) => {
       runInAction(() => {
         this.activity!.comments.push(comment);
       });
     });
 
-    this.hubConnection.on('Send', message => {
+    this.hubConnection.on('Send', (message) => {
       toast.info(message);
     });
   };
@@ -103,7 +110,7 @@ export default class ActivityStore {
         this.hubConnection!.stop();
       })
       .then(() => console.log('connection stopped'))
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   };
 
   @action addComment = async (values: any) => {
@@ -143,7 +150,7 @@ export default class ActivityStore {
       const activitiesEnvelope = await agent.Activities.list(this.axiosParams);
       const { activities, activityCount } = activitiesEnvelope;
       runInAction('loading activities', () => {
-        activities.forEach(activity => {
+        activities.forEach((activity) => {
           setActivityProps(activity, this.rootStore.userStore.user!);
           this.activityRegistry.set(activity.id, activity);
         });
@@ -162,7 +169,7 @@ export default class ActivityStore {
     let activity = this.getActivity(id);
     if (activity) {
       this.activity = activity;
-      return activity;
+      return toJS(activity);
     } else {
       this.loadingInitial = true;
       try {
@@ -285,7 +292,7 @@ export default class ActivityStore {
       runInAction(() => {
         if (this.activity) {
           this.activity.attendees = this.activity.attendees.filter(
-            a => a.username !== this.rootStore.userStore.user!.username
+            (a) => a.username !== this.rootStore.userStore.user!.username
           );
           this.activity.isGoing = false;
           this.activityRegistry.set(this.activity.id, this.activity);

@@ -30,7 +30,7 @@ const ActivityFilters = () => {
           onClick={() => setPredicate('isHost', 'true')}
           color={'blue'}
           name={'host'}
-          content={"I'm hosting"}
+          content={"I'm Hosting"}
         />
       </Menu>
       <Header
@@ -40,7 +40,7 @@ const ActivityFilters = () => {
         content={'Select Date'}
       />
       <Calendar
-        onChange={date => setPredicate('startDate', date!)}
+        onChange={(date) => setPredicate('startDate', date!)}
         value={predicate.get('startDate') || new Date()}
       />
     </>

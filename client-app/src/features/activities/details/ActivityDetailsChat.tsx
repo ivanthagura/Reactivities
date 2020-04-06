@@ -13,7 +13,7 @@ const ActivityDetailsChat = () => {
     createHubConnection,
     stopHubConnection,
     addComment,
-    activity
+    activity,
   } = rootStore.activityStore;
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const ActivityDetailsChat = () => {
         <Comment.Group>
           {activity &&
             activity.comments &&
-            activity.comments.map(comment => (
+            activity.comments.map((comment) => (
               <Comment key={comment.id}>
                 <Comment.Avatar src={comment.image || '/assets/user.png'} />
                 <Comment.Content>
