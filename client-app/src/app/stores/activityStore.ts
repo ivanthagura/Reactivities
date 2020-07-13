@@ -18,6 +18,7 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from '@microsoft/signalr';
+import jwt from 'jsonwebtoken';
 
 const LIMIT = 2;
 
@@ -79,7 +80,7 @@ export default class ActivityStore {
   @action createHubConnection = (activityId: string) => {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(process.env.REACT_APP_API_CHAT_URL!, {
-        accessTokenFactory: () => this.rootStore.commonStore.token!,
+        accessTokenFactory: () => this.checkTokenAndRefreshIfExpired(),
       })
       .configureLogging(LogLevel.Information)
       .build();
@@ -102,6 +103,23 @@ export default class ActivityStore {
     this.hubConnection.on('Send', (message) => {
       toast.info(message);
     });
+  };
+
+  checkTokenAndRefreshIfExpired = async () => {
+    const token = localStorage.getItem('jwt');
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (token && refreshToken) {
+      const decodedToken: any = jwt.decode(token);
+      if (decodedToken && Date.now() >= decodedToken.exp * 1000 - 5000) {
+        try {
+          return await agent.User.refreshToken(token, refreshToken);
+        } catch (error) {
+          toast.error('Problem connecting to the chat');
+        }
+      } else {
+        return token;
+      }
+    }
   };
 
   @action stopHubConnection = () => {

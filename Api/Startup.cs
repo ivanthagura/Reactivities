@@ -44,6 +44,7 @@ namespace Api
                 opt.UseLazyLoadingProxies();
                 //opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                //opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             ConfigureServices(services);
